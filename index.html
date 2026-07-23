@@ -11,10 +11,12 @@
 <body>
   <main class="app-shell">
     <nav class="date-nav" aria-label="Order date navigation">
+      <div class="date-context"><strong id="top-weekday">Today</strong><span id="top-date"></span></div>
       <button id="previous-date" class="w3-button nav-button" type="button" aria-label="Previous order date">‹ Previous</button>
       <input id="order-date" class="w3-input w3-border" type="date" aria-label="Order date">
       <button id="next-date" class="w3-button nav-button" type="button" aria-label="Next order date">Next ›</button>
       <button id="new-date" class="w3-button new-button" type="button">+ New date</button>
+      <label class="active-delivery-control" for="active-delivery"><span id="active-delivery-label">Delivery</span><select id="active-delivery" class="w3-select w3-border"></select></label>
     </nav>
 
     <div class="app-layout">
@@ -24,12 +26,18 @@
       </section>
 
       <aside class="totals-panel w3-white w3-card-2" aria-labelledby="totals-heading">
-        <div class="totals-heading"><h1 id="totals-heading">Totals by date</h1></div>
-        <div id="date-totals"></div>
-        <div class="grand-total"><span>All dates total</span><span id="grand-total">$0</span></div>
+        <div class="totals-heading"><h1 id="totals-heading">Totals by date</h1><button id="export-invoice" class="w3-button export-button" type="button">Export invoice</button></div>
+        <div id="totals-content" class="totals-content"><div id="date-totals"></div></div>
+        <div class="totals-footer"><div class="all-totals"><div><span>Food subtotal</span><span class="total-caption">No delivery</span></div><strong id="food-subtotal">$0</strong></div><div class="grand-total"><span>All dates total</span><span id="grand-total">$0</span></div></div>
       </aside>
     </div>
   </main>
-  <script src="app.js"></script>
+  <div id="invoice-modal" class="invoice-modal" role="dialog" aria-modal="true" aria-labelledby="invoice-title" hidden>
+    <div class="invoice-dialog">
+      <div class="invoice-actions"><button id="delivery-toggle" class="w3-button format-button" type="button">Show Delivery</button><button id="format-toggle" class="w3-button format-button" type="button">For Gmail</button><button id="copy-invoice" class="w3-button copy-button" type="button">Copy invoice</button><button id="close-invoice" class="w3-button close-button" type="button" aria-label="Close invoice">×</button></div>
+      <div id="invoice-content" class="invoice-content" contenteditable="true"></div>
+      <p id="copy-status" class="copy-status" aria-live="polite"></p>
+    </div>
+  </div>  <script src="app.js"></script>
 </body>
 </html>

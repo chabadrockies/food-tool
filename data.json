@@ -1,17 +1,17 @@
 ﻿{
   "categories": [
-    { "name": "Entrées", "items": [
+    { "name": "Mains", "items": [
       { "name": "Burger with Fries", "price": 54 },
-      { "name": "Falafel Plate", "price": 48, "description": "Israeli salad, falafel balls, pita, techina, fries" },
+      { "name": "Falafel Plate", "price": 48 },
       { "name": "Meatballs & Spaghetti", "price": 62 },
-      { "name": "Dark Chicken Dinner", "price": 76, "description": "Quarter dark meat, rice, green beans" },
-      { "name": "Grilled Chicken Breast Dinner", "price": 80, "description": "Grilled chicken breast, rice, green beans" },
-      { "name": "Chicken Fingers", "price": 84, "description": "Breaded chicken, rice, green beans" },
-      { "name": "Vegetarian Plate", "price": 76, "description": "Grilled portobello mushroom, yam, green beans" },
-      { "name": "Salmon Dinner", "price": 84, "description": "Salmon, mashed potatoes, green beans" },
-      { "name": "Shawarma Plate", "price": 94, "description": "Shawarma, rice, Israeli salad, pita, techina" },
-      { "name": "Brisket/Roast Dinner", "price": 98, "description": "Brisket or roast beef, mashed potatoes, green beans" },
-      { "name": "Steak Dinner", "price": 108, "description": "Steak, mashed potatoes, green beans" },
+      { "name": "Dark Chicken Dinner", "price": 76 },
+      { "name": "Grilled Chicken Breast Dinner", "price": 80 },
+      { "name": "Chicken Fingers", "price": 84 },
+      { "name": "Vegetarian Plate", "price": 76 },
+      { "name": "Salmon Dinner", "price": 84 },
+      { "name": "Shawarma Plate", "price": 94 },
+      { "name": "Brisket/Roast Dinner", "price": 98 },
+      { "name": "Steak Dinner", "price": 108 },
       { "name": "Sushi Party Platter", "price": 268 }
     ]},
     { "name": "Boxed Lunches", "subtitle": "Includes water bottle, snack, & fresh fruit", "items": [
