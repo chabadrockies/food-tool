@@ -4,6 +4,7 @@ let deliveryMethods = {};
 const orders = {};
 let activeDate = '';
 let invoiceFormat = 'email';
+let showDelivery = false;
 
 const money = value => `$${value.toLocaleString()}`;
 const formatDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -127,7 +128,7 @@ function whatsappInvoiceText(invoice, showDelivery) {
 }
 function showInvoice() {
   const invoice = invoiceData();
-  const showDelivery = document.getElementById('show-delivery').checked;
+  const showDelivery = showDelivery;
   const content = document.getElementById('invoice-content');
   content.classList.toggle('whatsapp-format', invoiceFormat === 'whatsapp');
   if (invoiceFormat === 'whatsapp') content.textContent = whatsappInvoiceText(invoice, showDelivery);
@@ -138,7 +139,7 @@ function showInvoice() {
 function closeInvoice() { document.getElementById('invoice-modal').hidden = true; }
 function invoicePlainText() {
   const invoice = invoiceData();
-  const showDelivery = document.getElementById('show-delivery').checked;
+  const showDelivery = showDelivery;
   return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...(showDelivery ? [`Delivery: ${section.delivery.name} — ${money(section.delivery.fee)}`, 'Delivery Time: TBD'] : []), ...section.lines, '']), `Meals Subtotal: ${money(invoice.foodSubtotal)} USD`, `Delivery Charges: ${money(invoice.deliveryTotal)} USD`, `Weekday Meals Total: ${money(invoice.grandTotal)} USD`].join('\n');
 }
 function toggleInvoiceFormat() {
@@ -147,7 +148,7 @@ function toggleInvoiceFormat() {
   if (!document.getElementById('invoice-modal').hidden) showInvoice();
 }
 async function copyInvoice() {
-  const text = invoiceFormat === 'whatsapp' ? whatsappInvoiceText(invoiceData(), document.getElementById('show-delivery').checked) : invoicePlainText();
+  const text = invoiceFormat === 'whatsapp' ? whatsappInvoiceText(invoiceData(), showDelivery) : invoicePlainText();
   const html = document.getElementById('invoice-content').innerHTML;
   try {
     if (invoiceFormat === 'email' && navigator.clipboard && window.ClipboardItem) {
@@ -192,7 +193,7 @@ async function initialize() {
   document.getElementById('export-invoice').addEventListener('click', showInvoice);
   document.getElementById('close-invoice').addEventListener('click', closeInvoice);
   document.getElementById('copy-invoice').addEventListener('click', copyInvoice);
-  document.getElementById('show-delivery').addEventListener('change', () => { if (!document.getElementById('invoice-modal').hidden) showInvoice(); });
+  document.getElementById('delivery-toggle').addEventListener('click',()=>{showDelivery=!showDelivery;document.getElementById('delivery-toggle').textContent=showDelivery?'Hide Delivery':'Show Delivery';if(!document.getElementById('invoice-modal').hidden)showInvoice();});
   document.getElementById('format-toggle').addEventListener('click', toggleInvoiceFormat);
   document.getElementById('invoice-modal').addEventListener('click', event => { if (event.target.id === 'invoice-modal') closeInvoice(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeInvoice(); });
