@@ -6,109 +6,30 @@
   <meta name="description" content="Internal food order entry tool">
   <title>Chabad Food | Order Entry</title>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <style>
-    :root { --brand:#315c42; --accent:#e8b44d; --ink:#21352a; --cream:#f7f5ef; }
-    body { background:var(--cream); color:var(--ink); font-family:Georgia,serif; }
-    .site-header { background:var(--brand); color:#fff; border-bottom:5px solid var(--accent); }
-    .date-bar { background:#fffdf7; border:1px solid #ddd8c9; border-radius:8px; }
-    .menu-card { border:1px solid #ddd8c9; border-radius:8px; overflow:hidden; }
-    .item-name { font-size:1.08em; font-weight:bold; }
-    .item-description { color:#5d685f; font-size:.92em; line-height:1.35; }
-    .price { color:var(--brand); font-size:1.1em; font-weight:bold; white-space:nowrap; }
-    .quantity-control { display:inline-flex; align-items:center; border:1px solid #c9c5b8; border-radius:5px; overflow:hidden; }
-    .quantity-control button { border:0; min-width:36px; height:34px; cursor:pointer; font-size:1.2em; }
-    .quantity-control button:hover { background:#e6e1d5; }
-    .quantity { width:34px; text-align:center; font-family:Arial,sans-serif; font-weight:bold; }
-    .summary-panel { position:sticky; top:18px; }
-    .summary-title, .date-card-active { background:var(--brand); color:#fff; }
-    .date-card { border:1px solid #ddd8c9; border-radius:6px; overflow:hidden; }
-    .summary-row { border-bottom:1px solid #e5e2da; }
-    .empty-summary { color:#68746b; font-style:italic; }
-    .total-row { color:var(--brand); font-size:1.08em; font-weight:bold; }
-    .date-card-active .total-row { color:white; }
-    .section-heading { color:var(--brand); border-bottom:2px solid var(--accent); padding-bottom:6px; margin-top:28px; }
-    .delivery-select { width:100%; }
-    .date-tab { margin:0 5px 5px 0; }
-    .active-date-label { color:var(--brand); font-weight:bold; }
-    @media(max-width:992px) { .summary-panel { position:static; } }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="site-header w3-padding-24">
-    <div class="w3-content" style="max-width:1400px">
-      <p class="w3-margin-0 w3-small" style="letter-spacing:.12em">CHABAD FOOD</p>
-      <h1 class="w3-margin-top w3-margin-bottom">Order Entry</h1>
-      <p class="w3-margin-0">Build a separate food order and delivery selection for each date.</p>
-    </div>
-  </header>
-  <main class="w3-content w3-padding-24" style="max-width:1400px">
-    <section class="date-bar w3-padding" aria-label="Order dates">
-      <div class="w3-row-padding">
-        <div class="w3-col s12 m5 l4"><label for="new-date"><strong>Order date</strong></label><input id="new-date" class="w3-input w3-border" type="date"></div>
-        <div class="w3-col s12 m3 l2" style="padding-top:24px"><button id="add-date" class="w3-button w3-block" style="background:#315c42;color:white" type="button">Add / select date</button></div>
-        <div class="w3-col s12 m4 l6" style="padding-top:8px"><p class="w3-small w3-margin-bottom">Dates in this order</p><div id="date-tabs"></div></div>
-      </div>
-    </section>
-    <div class="w3-row-padding w3-margin-top">
-      <section class="w3-twothird" aria-label="Menu">
-        <p id="active-date-message" class="active-date-label"></p>
+  <main class="app-shell">
+    <nav class="date-nav" aria-label="Order date navigation">
+      <button id="previous-date" class="w3-button nav-button" type="button" aria-label="Previous order date">‹ Previous</button>
+      <input id="order-date" class="w3-input w3-border" type="date" aria-label="Order date">
+      <button id="next-date" class="w3-button nav-button" type="button" aria-label="Next order date">Next ›</button>
+      <button id="new-date" class="w3-button new-button" type="button">+ New date</button>
+    </nav>
+
+    <div class="app-layout">
+      <section class="menu-area" aria-label="Menu">
+        <p id="active-date-message" class="date-title"></p>
         <div id="menu"></div>
       </section>
-      <aside class="w3-third" aria-label="Order summary">
-        <div class="summary-panel w3-white w3-card-2 w3-round">
-          <div class="summary-title w3-padding"><h2 class="w3-large w3-margin-0">Orders by Date</h2></div>
-          <div id="date-summaries" class="w3-padding"></div>
-          <div class="w3-padding w3-border-top"><div class="w3-row total-row"><span>All dates total</span><span id="grand-total" class="w3-right">$0</span></div><button id="clear-order" class="w3-button w3-block w3-margin-top" style="background:#e6e1d5" type="button">Clear all dates</button></div>
-        </div>
+
+      <aside class="totals-panel w3-white w3-card-2" aria-labelledby="totals-heading">
+        <div class="totals-heading"><h1 id="totals-heading">Totals by date</h1></div>
+        <div id="date-totals"></div>
+        <div class="grand-total"><span>All dates total</span><span id="grand-total">$0</span></div>
       </aside>
     </div>
   </main>
-  <script>
-    const categories = [
-      { name:'Entrées', items:[['Burger with Fries',54],['Falafel Plate',48,'Israeli salad, falafel balls, pita, techina, fries'],['Meatballs & Spaghetti',62],['Dark Chicken Dinner',76,'Quarter dark meat, rice, green beans'],['Grilled Chicken Breast Dinner',80,'Grilled chicken breast, rice, green beans'],['Chicken Fingers',84,'Breaded chicken, rice, green beans'],['Vegetarian Plate',76,'Grilled portobello mushroom, yam, green beans'],['Salmon Dinner',84,'Salmon, mashed potatoes, green beans'],['Shawarma Plate',94,'Shawarma, rice, Israeli salad, pita, techina'],['Brisket/Roast Dinner',98,'Brisket or roast beef, mashed potatoes, green beans'],['Steak Dinner',108,'Steak, mashed potatoes, green beans'],['Sushi Party Platter',268]] },
-      { name:'Boxed Lunches', subtitle:'Includes water bottle, snack, & fresh fruit', items:[['Tuna Wrap',38],['Tuna on Bagel/Multi-Grain Roll',38],['Egg Salad Wrap',38],['Egg Salad on Bagel/Multi-Grain Roll',38],['Chicken Avocado Wrap',66],['Lox & Cream Cheese Bagel',52],['Deli on Sour Dough Bread',66]] },
-      { name:'Salads & Sides', items:[['Israeli Salad (8 oz)',18],['Coleslaw (8 oz)',18],['Potato Salad (16 oz)',28],['Corn Salad (8 oz)',22],['Sesame Noodles (16 oz)',22],['French Fries',24],['Spicey Fries',26]] },
-      { name:'Soups', items:[['Butternut Squash Soup',20],['Mushroom Barley Soup',20],['Zucchini Soup',20],['Chicken Soup with Matzah Ball',20]] },
-      { name:'Desserts', items:[['Dozen Chocolate Chip Cookies',36],['Dozen Craisin Oatmeal Cookies',36],['Apple Turnovers (4)',26],['Brownies Tray',28]] }
-    ];
-    const items = categories.flatMap(category => category.items.map(([name, price, description='']) => ({name, price, description})));
-    const deliveryMethods = { pickup:{name:'Pickup / no delivery', fee:0}, canmore:{name:'Canmore delivery', fee:20}, banff:{name:'Banff delivery', fee:90}, lakeLouise:{name:'Lake Louise delivery', fee:185}, kananaskis:{name:'Kananaskis delivery', fee:185} };
-    const orders = {};
-    let activeDate = '';
-    const money = value => `$${value.toLocaleString()}`;
-    const dateLabel = value => new Date(`${value}T12:00:00`).toLocaleDateString('en-CA', {weekday:'short', month:'short', day:'numeric', year:'numeric'});
-    const today = new Date().toLocaleDateString('en-CA');
-
-    function createOrder(date) { if (!orders[date]) orders[date] = { quantities:Array(items.length).fill(0), delivery:'pickup' }; activeDate = date; }
-    function activeOrder() { return orders[activeDate]; }
-    function foodTotal(order) { return order.quantities.reduce((total, quantity, index) => total + quantity * items[index].price, 0); }
-    function orderTotal(order) { return foodTotal(order) + deliveryMethods[order.delivery].fee; }
-
-    function renderMenu() {
-      const order = activeOrder();
-      document.getElementById('active-date-message').textContent = `Editing food for ${dateLabel(activeDate)}`;
-      document.getElementById('menu').innerHTML = categories.map(category => {
-        const id = category.name.replaceAll(' ','-').toLowerCase();
-        const categoryItems = category.items.map(([name]) => items.findIndex(item => item.name === name));
-        return `<section aria-labelledby="${id}"><h2 id="${id}" class="section-heading w3-xlarge">${category.name}</h2>${category.subtitle ? `<p class="w3-text-grey w3-small">${category.subtitle}</p>` : ''}<div class="menu-card w3-white">${categoryItems.map(index => { const item=items[index]; return `<article class="w3-row w3-padding" style="border-bottom:1px solid #e8e5dd"><div class="w3-col s12 m7 l7 w3-padding-small"><div class="item-name">${item.name}</div>${item.description ? `<div class="item-description">${item.description}</div>` : ''}</div><div class="w3-col s5 m2 l2 w3-padding-small price">${money(item.price)}</div><div class="w3-col s7 m3 l3 w3-padding-small w3-right-align"><div class="quantity-control" aria-label="Quantity for ${item.name}"><button type="button" aria-label="Remove one ${item.name}" onclick="changeQuantity(${index},-1)">−</button><span class="quantity" id="quantity-${index}">${order.quantities[index]}</span><button type="button" aria-label="Add one ${item.name}" onclick="changeQuantity(${index},1)">+</button></div></div></article>`; }).join('')}</div></section>`;
-      }).join('');
-    }
-    function renderDateTabs() { document.getElementById('date-tabs').innerHTML = Object.keys(orders).sort().map(date => `<button type="button" class="w3-button date-tab ${date === activeDate ? 'w3-dark-grey' : 'w3-light-grey'}" onclick="selectDate('${date}')">${dateLabel(date)}</button>`).join(''); }
-    function deliveryOptions(selected) { return Object.entries(deliveryMethods).map(([key, method]) => `<option value="${key}" ${key === selected ? 'selected' : ''}>${method.name} — ${money(method.fee)}</option>`).join(''); }
-    function renderSummaries() {
-      const dates = Object.keys(orders).sort();
-      document.getElementById('date-summaries').innerHTML = dates.map(date => { const order=orders[date], selected=items.filter((item,index) => order.quantities[index]); return `<section class="date-card w3-margin-bottom ${date === activeDate ? 'date-card-active' : ''}"><div class="w3-padding"><button type="button" class="w3-button w3-padding-small ${date === activeDate ? 'w3-white' : 'w3-light-grey'}" onclick="selectDate('${date}')">${dateLabel(date)}${date === activeDate ? ' (editing)' : ''}</button><label class="w3-small w3-margin-top" for="delivery-${date}" style="display:block">Delivery method</label><select id="delivery-${date}" class="w3-select w3-border delivery-select" onchange="setDelivery('${date}',this.value)">${deliveryOptions(order.delivery)}</select><div class="w3-small w3-margin-top">${selected.length ? selected.map(item => `${order.quantities[items.indexOf(item)]} × ${item.name}`).join('<br>') : '<em>No food selected yet.</em>'}</div><div class="w3-row w3-small w3-margin-top"><span>Food</span><span class="w3-right">${money(foodTotal(order))}</span></div><div class="w3-row w3-small"><span>Delivery</span><span class="w3-right">${money(deliveryMethods[order.delivery].fee)}</span></div><div class="w3-row total-row w3-margin-top"><span>Date total</span><span class="w3-right">${money(orderTotal(order))}</span></div></div></section>`; }).join('');
-      document.getElementById('grand-total').textContent = money(dates.reduce((total,date) => total + orderTotal(orders[date]), 0));
-    }
-    function render() { renderMenu(); renderDateTabs(); renderSummaries(); }
-    function changeQuantity(index, adjustment) { const order=activeOrder(); order.quantities[index] = Math.max(0, order.quantities[index] + adjustment); render(); }
-    function selectDate(date) { activeDate=date; render(); }
-    function setDelivery(date, method) { orders[date].delivery=method; renderSummaries(); }
-    document.getElementById('add-date').addEventListener('click', () => { const date=document.getElementById('new-date').value; if (!date) return; createOrder(date); render(); });
-    document.getElementById('clear-order').addEventListener('click', () => { Object.keys(orders).forEach(date => delete orders[date]); createOrder(document.getElementById('new-date').value || today); render(); });
-    document.getElementById('new-date').value = today;
-    createOrder(today);
-    render();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>

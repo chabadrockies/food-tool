@@ -1,0 +1,35 @@
+﻿{
+  "categories": [
+    { "name": "Entrées", "items": [
+      { "name": "Burger with Fries", "price": 54 },
+      { "name": "Falafel Plate", "price": 48, "description": "Israeli salad, falafel balls, pita, techina, fries" },
+      { "name": "Meatballs & Spaghetti", "price": 62 },
+      { "name": "Dark Chicken Dinner", "price": 76, "description": "Quarter dark meat, rice, green beans" },
+      { "name": "Grilled Chicken Breast Dinner", "price": 80, "description": "Grilled chicken breast, rice, green beans" },
+      { "name": "Chicken Fingers", "price": 84, "description": "Breaded chicken, rice, green beans" },
+      { "name": "Vegetarian Plate", "price": 76, "description": "Grilled portobello mushroom, yam, green beans" },
+      { "name": "Salmon Dinner", "price": 84, "description": "Salmon, mashed potatoes, green beans" },
+      { "name": "Shawarma Plate", "price": 94, "description": "Shawarma, rice, Israeli salad, pita, techina" },
+      { "name": "Brisket/Roast Dinner", "price": 98, "description": "Brisket or roast beef, mashed potatoes, green beans" },
+      { "name": "Steak Dinner", "price": 108, "description": "Steak, mashed potatoes, green beans" },
+      { "name": "Sushi Party Platter", "price": 268 }
+    ]},
+    { "name": "Boxed Lunches", "subtitle": "Includes water bottle, snack, & fresh fruit", "items": [
+      { "name": "Tuna Wrap", "price": 38 }, { "name": "Tuna on Bagel/Multi-Grain Roll", "price": 38 },
+      { "name": "Egg Salad Wrap", "price": 38 }, { "name": "Egg Salad on Bagel/Multi-Grain Roll", "price": 38 },
+      { "name": "Chicken Avocado Wrap", "price": 66 }, { "name": "Lox & Cream Cheese Bagel", "price": 52 }, { "name": "Deli on Sour Dough Bread", "price": 66 }
+    ]},
+    { "name": "Salads & Sides", "items": [
+      { "name": "Israeli Salad (8 oz)", "price": 18 }, { "name": "Coleslaw (8 oz)", "price": 18 }, { "name": "Potato Salad (16 oz)", "price": 28 }, { "name": "Corn Salad (8 oz)", "price": 22 }, { "name": "Sesame Noodles (16 oz)", "price": 22 }, { "name": "French Fries", "price": 24 }, { "name": "Spicey Fries", "price": 26 }
+    ]},
+    { "name": "Soups", "items": [
+      { "name": "Butternut Squash Soup", "price": 20 }, { "name": "Mushroom Barley Soup", "price": 20 }, { "name": "Zucchini Soup", "price": 20 }, { "name": "Chicken Soup with Matzah Ball", "price": 20 }
+    ]},
+    { "name": "Desserts", "items": [
+      { "name": "Dozen Chocolate Chip Cookies", "price": 36 }, { "name": "Dozen Craisin Oatmeal Cookies", "price": 36 }, { "name": "Apple Turnovers (4)", "price": 26 }, { "name": "Brownies Tray", "price": 28 }
+    ]}
+  ],
+  "deliveryMethods": [
+    { "id": "pickup", "name": "Pickup / no delivery", "fee": 0 }, { "id": "canmore", "name": "Canmore", "fee": 20 }, { "id": "banff", "name": "Banff", "fee": 90 }, { "id": "lakeLouise", "name": "Lake Louise", "fee": 185 }, { "id": "kananaskis", "name": "Kananaskis", "fee": 185 }
+  ]
+}
