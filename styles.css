@@ -29,7 +29,7 @@ button, select, input { font:inherit; }
 .quantity-control button:hover { background:#e6e1d5; }
 .quantity { width:32px; text-align:center; font-family:Arial,sans-serif; font-weight:bold; }
 .selected-label { color:var(--brand); font-family:Arial,sans-serif; font-size:.8rem; font-weight:bold; }
-.totals-panel { position:sticky; top:18px; display:flex; flex-direction:column; height:calc(100vh - 36px); overflow:hidden; border-top:4px solid var(--accent); }
+.totals-panel { position:sticky; top:86px; display:flex; flex-direction:column; height:calc(100vh - 104px); overflow:hidden; border-top:4px solid var(--accent); }
 .totals-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); }
 .totals-heading h1 { font-size:1.15rem; margin:0; }
 .export-button { background:var(--brand); color:#fff; white-space:nowrap; }
