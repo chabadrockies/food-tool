@@ -5,6 +5,8 @@ const orders = {};
 let activeDate = '';
 let invoiceFormat = 'email';
 let showDelivery = false;
+let sidebarManuallyScrolled = false;
+let programmaticSidebarScroll = false;
 
 const money = value => `$${value.toLocaleString()}`;
 const formatDate = date => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -50,11 +52,13 @@ function deliveryOptions(selected) {
 }
 function renderTotals() {
   const dates = Object.keys(orders).sort();
+  const totalsContent = document.getElementById('totals-content');
+  const savedScrollTop = totalsContent.scrollTop;
   document.getElementById('date-totals').innerHTML = dates.map(date => {
     const order = orders[date];
     const selectedItems = items.map((item, index) => ({ item, quantity: order.quantities[index] })).filter(selection => selection.quantity);
     const itemList = selectedItems.length ? selectedItems.map(({ item, quantity }) => `<div class="selected-item"><span>${quantity} × ${item.name}</span><span>${money(quantity * item.price)}</span></div>`).join('') : '<p class="empty-selection">No food selected.</p>';
-    return `<section class="date-total">
+    return `<section id="date-total-${date}" class="date-total ${date === activeDate ? 'current-date' : ''}">
       <span class="total-date">${dateLabel(date)}</span>
       <div class="selected-items">${itemList}</div>
       
@@ -65,8 +69,28 @@ function renderTotals() {
   const grandTotal = dates.reduce((total, date) => total + orderTotal(orders[date]), 0);
   document.getElementById('food-subtotal').textContent = money(foodSubtotal);
   document.getElementById('grand-total').textContent = money(grandTotal);
+  if (sidebarManuallyScrolled) totalsContent.scrollTop = savedScrollTop;
+  else scrollSidebarToCurrentDate();
 }
-function render() { const order = activeOrder(); document.getElementById('order-date').value = activeDate; document.getElementById('active-delivery-label').textContent = `Delivery for ${dateLabel(activeDate)}`; document.getElementById('active-delivery').innerHTML = deliveryOptions(order.delivery); renderMenu(); renderTotals(); }
+function scrollSidebarToCurrentDate() {
+  const totalsContent = document.getElementById('totals-content');
+  const currentDate = document.getElementById(`date-total-${activeDate}`);
+  if (!currentDate || window.matchMedia('(max-width: 900px)').matches) return;
+  programmaticSidebarScroll = true;
+  totalsContent.scrollTop = Math.max(0, currentDate.offsetTop - totalsContent.offsetTop - 8);
+  requestAnimationFrame(() => { programmaticSidebarScroll = false; });
+}
+function render() {
+  const order = activeOrder();
+  const activeDateObject = new Date(`${activeDate}T12:00:00`);
+  document.getElementById('order-date').value = activeDate;
+  document.getElementById('top-weekday').textContent = activeDateObject.toLocaleDateString('en-CA', { weekday: 'long' });
+  document.getElementById('top-date').textContent = activeDateObject.toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+  document.getElementById('active-delivery-label').textContent = 'Delivery';
+  document.getElementById('active-delivery').innerHTML = deliveryOptions(order.delivery);
+  renderMenu();
+  renderTotals();
+}
 function addItem(index) { activeOrder().quantities[index] += 1; render(); }
 function changeQuantity(index, adjustment) { const order = activeOrder(); order.quantities[index] = Math.max(0, order.quantities[index] + adjustment); render(); }
 function setActiveDelivery(method) { activeOrder().delivery = method; renderTotals(); }
@@ -128,7 +152,7 @@ function whatsappInvoiceText(invoice, showDelivery) {
 }
 function showInvoice() {
   const invoice = invoiceData();
-  const showDelivery = showDelivery;
+  
   const content = document.getElementById('invoice-content');
   content.classList.toggle('whatsapp-format', invoiceFormat === 'whatsapp');
   if (invoiceFormat === 'whatsapp') content.textContent = whatsappInvoiceText(invoice, showDelivery);
@@ -139,12 +163,12 @@ function showInvoice() {
 function closeInvoice() { document.getElementById('invoice-modal').hidden = true; }
 function invoicePlainText() {
   const invoice = invoiceData();
-  const showDelivery = showDelivery;
+  
   return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...(showDelivery ? [`Delivery: ${section.delivery.name} — ${money(section.delivery.fee)}`, 'Delivery Time: TBD'] : []), ...section.lines, '']), `Meals Subtotal: ${money(invoice.foodSubtotal)} USD`, `Delivery Charges: ${money(invoice.deliveryTotal)} USD`, `Weekday Meals Total: ${money(invoice.grandTotal)} USD`].join('\n');
 }
 function toggleInvoiceFormat() {
   invoiceFormat = invoiceFormat === 'email' ? 'whatsapp' : 'email';
-  document.getElementById('format-toggle').textContent = invoiceFormat === 'email' ? 'For WhatsApp' : 'For Email';
+  document.getElementById('format-toggle').textContent = invoiceFormat === 'email' ? 'For Gmail' : 'For WhatsApp';
   if (!document.getElementById('invoice-modal').hidden) showInvoice();
 }
 async function copyInvoice() {
@@ -171,6 +195,10 @@ async function initialize() {
   deliveryMethods = Object.fromEntries(data.deliveryMethods.map(method => [method.id, method]));
   createOrder(today);
   render();
+  const totalsContent = document.getElementById('totals-content');
+  totalsContent.addEventListener('wheel', () => { sidebarManuallyScrolled = true; }, { passive: true });
+  totalsContent.addEventListener('touchmove', () => { sidebarManuallyScrolled = true; }, { passive: true });
+  totalsContent.addEventListener('scroll', () => { if (!programmaticSidebarScroll) sidebarManuallyScrolled = true; }, { passive: true });
   document.getElementById('previous-date').addEventListener('click', () => selectAdjacent(-1));
   document.getElementById('next-date').addEventListener('click', () => selectAdjacent(1));
   let touchStart = null;
