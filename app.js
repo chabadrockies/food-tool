@@ -201,7 +201,7 @@ function invoiceSummaryMarkup(invoice) {
   const lines = [];
   if (invoice.foodSubtotal !== invoice.grandTotal) lines.push(`<div><strong>Meals Subtotal:</strong> <strong>${money(invoice.foodSubtotal)} USD</strong></div>`);
   if (invoice.deliveryTotal) lines.push(`<div><strong>Delivery Charges:</strong> <strong>${money(invoice.deliveryTotal)} USD</strong></div>`);
-  lines.push(`<div><strong>Weekday Meals Total:</strong> <strong>${money(invoice.grandTotal)} USD</strong></div>`);
+  lines.push(`<div><strong>Total:</strong> <strong>${money(invoice.grandTotal)} USD</strong></div>`);
   return `<div class="invoice-summary">${lines.join('')}</div>`;
 }
 function invoiceDeliveryMarkup(delivery) {
@@ -231,7 +231,7 @@ function whatsappInvoiceText(invoice, showDelivery) {
   const summary = [];
   if (invoice.foodSubtotal !== invoice.grandTotal) summary.push(`*Meals Subtotal:* *${money(invoice.foodSubtotal)} USD*`);
   if (invoice.deliveryTotal) summary.push(`*Delivery Charges:* *${money(invoice.deliveryTotal)} USD*`);
-  summary.push(`*Weekday Meals Total:* *${money(invoice.grandTotal)} USD*`);
+  summary.push(`*Total:* *${money(invoice.grandTotal)} USD*`);
   return [`*Kosher Food Order Summary*`, '', ...invoice.sections.flatMap(section => [`*${invoiceDateLabel(section.date)}*`, ...(showDelivery ? whatsappDeliveryText(section.delivery) : []), ...section.lines.map(whatsappItemLine), '']), ...summary].join('\n');
 }function showInvoice() {
   const invoice = invoiceData();
@@ -250,7 +250,7 @@ function invoicePlainText() {
   const summary = [];
   if (invoice.foodSubtotal !== invoice.grandTotal) summary.push(`Meals Subtotal: ${money(invoice.foodSubtotal)} USD`);
   if (invoice.deliveryTotal) summary.push(`Delivery Charges: ${money(invoice.deliveryTotal)} USD`);
-  summary.push(`Weekday Meals Total: ${money(invoice.grandTotal)} USD`);
+  summary.push(`Total: ${money(invoice.grandTotal)} USD`);
   return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...(showDelivery ? invoiceDeliveryText(section.delivery) : []), ...section.lines, '']), ...summary].join('\n');
 }
 function toggleInvoiceFormat() {
