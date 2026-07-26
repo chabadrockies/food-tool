@@ -166,7 +166,7 @@
     "deliveryMethods": [
         {
             "id": "pickup",
-            "name": "Pickup / no delivery",
+            "name": "Pick up / no delivery",
             "fee": 0
         },
         {
