@@ -1,4 +1,4 @@
-﻿let categories = [];
+let categories = [];
 let items = [];
 let deliveryMethods = {};
 const orders = {};
@@ -50,6 +50,14 @@ function menuTile(index, quantity) {
 function deliveryOptions(selected) {
   return Object.values(deliveryMethods).map(method => `<option value="${method.id}" ${method.id === selected ? 'selected' : ''}>${method.name} — ${money(method.fee)}</option>`).join('');
 }
+function renderDateList() {
+  const dates = Object.keys(orders).sort();
+  document.getElementById('date-list').innerHTML = dates.map(date => `<div class="w3-col s12 m6 l4"><div class="date-chip ${date === activeDate ? 'active-date-chip' : ''}">
+    <button class="date-chip-open w3-button" type="button" data-date-action="open" data-date="${date}" aria-current="${date === activeDate ? 'date' : 'false'}">${dateLabel(date)}</button>
+    <button class="date-chip-action w3-button" type="button" data-date-action="edit" data-date="${date}" aria-label="Change date for ${dateLabel(date)}">Edit date</button>
+    <button class="date-chip-action delete-date w3-button" type="button" data-date-action="delete" data-date="${date}" aria-label="Delete ${dateLabel(date)}">Delete</button>
+  </div></div>`).join('');
+}
 function renderTotals() {
   const dates = Object.keys(orders).sort();
   const totalsContent = document.getElementById('totals-content');
@@ -82,12 +90,19 @@ function scrollSidebarToCurrentDate() {
 }
 function render() {
   const order = activeOrder();
-  const activeDateObject = new Date(`${activeDate}T12:00:00`);
-  document.getElementById('order-date').value = activeDate;
-  document.getElementById('top-weekday').textContent = activeDateObject.toLocaleDateString('en-CA', { weekday: 'long' });
-  document.getElementById('top-date').textContent = activeDateObject.toLocaleDateString('en-CA', { month: 'long', day: 'numeric', year: 'numeric' });
+  const deliverySelect = document.getElementById('active-delivery');
+  renderDateList();
+  if (!order) {
+    document.getElementById('active-date-message').textContent = 'Choose an order date to begin.';
+    document.getElementById('menu').innerHTML = '';
+    deliverySelect.innerHTML = '';
+    deliverySelect.disabled = true;
+    renderTotals();
+    return;
+  }
   document.getElementById('active-delivery-label').textContent = 'Delivery';
-  document.getElementById('active-delivery').innerHTML = deliveryOptions(order.delivery);
+  deliverySelect.disabled = false;
+  deliverySelect.innerHTML = deliveryOptions(order.delivery);
   renderMenu();
   renderTotals();
 }
@@ -107,7 +122,54 @@ function selectAdjacent(direction, animate = false) {
   const date = dates[dates.indexOf(activeDate) + direction];
   if (date) { activeDate = date; render(); if (animate) animateDateChange(direction); }
 }
-function escapeHtml(value) { return value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character])); }
+let datePickerAction = null;
+let dateBeingEdited = null;
+function openDatePicker(action, value, editingDate = null) {
+  datePickerAction = action;
+  dateBeingEdited = editingDate;
+  const picker = document.getElementById('date-picker');
+  picker.value = value;
+  picker.focus({ preventScroll: true });
+  try { picker.showPicker(); } catch { picker.click(); }
+}
+function applyPickedDate(date) {
+  if (!date) return;
+  if (datePickerAction === 'new') {
+    if (orders[date]) { activeDate = date; render(); return; }
+    createOrder(date, activeOrder() ? activeOrder().delivery : 'pickup');
+    render();
+    return;
+  }
+  if (datePickerAction === 'edit' && dateBeingEdited) {
+    if (date === dateBeingEdited) return;
+    if (orders[date]) { window.alert(`${dateLabel(date)} already has an order. Choose a different date.`); return; }
+    orders[date] = orders[dateBeingEdited];
+    delete orders[dateBeingEdited];
+    activeDate = date;
+    render();
+  }
+}
+function deleteDate(date) {
+  if (!window.confirm(`Delete the order for ${dateLabel(date)}? This cannot be undone.`)) return;
+  delete orders[date];
+  const remainingDates = Object.keys(orders).sort();
+  if (activeDate === date) activeDate = remainingDates[0] || '';
+  render();
+}
+function showStartDatePrompt() {
+  const modal = document.getElementById('start-date-modal');
+  const input = document.getElementById('start-date');
+  input.value = today;
+  modal.hidden = false;
+  input.focus();
+}
+function startOrder(date) {
+  if (!date) return;
+  createOrder(date);
+  document.getElementById('start-date-modal').hidden = true;
+  render();
+}
+function escapeHtml(value) { return value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&#39;' }[character])); }
 function ordinal(day) { const remainder = day % 100; if (remainder >= 11 && remainder <= 13) return `${day}th`; return `${day}${({ 1: 'st', 2: 'nd', 3: 'rd' }[day % 10] || 'th')}`; }
 function invoiceDateLabel(value) { const date = new Date(`${value}T12:00:00`); const weekday = date.toLocaleDateString('en-CA', { weekday: 'long' }); const month = date.toLocaleDateString('en-CA', { month: 'long' }); return `${weekday}, ${month} ${ordinal(date.getDate())}`; }
 function pluralize(name) { return /s$/i.test(name) ? name : `${name}s`; }
@@ -193,14 +255,11 @@ async function initialize() {
   categories = data.categories;
   items = categories.flatMap(category => category.items);
   deliveryMethods = Object.fromEntries(data.deliveryMethods.map(method => [method.id, method]));
-  createOrder(today);
   render();
   const totalsContent = document.getElementById('totals-content');
   totalsContent.addEventListener('wheel', () => { sidebarManuallyScrolled = true; }, { passive: true });
   totalsContent.addEventListener('touchmove', () => { sidebarManuallyScrolled = true; }, { passive: true });
   totalsContent.addEventListener('scroll', () => { if (!programmaticSidebarScroll) sidebarManuallyScrolled = true; }, { passive: true });
-  document.getElementById('previous-date').addEventListener('click', () => selectAdjacent(-1));
-  document.getElementById('next-date').addEventListener('click', () => selectAdjacent(1));
   let touchStart = null;
   document.addEventListener('touchstart', event => {
     if (!window.matchMedia('(max-width: 600px)').matches || event.touches.length !== 1 || event.target.closest('.invoice-modal')) return;
@@ -215,8 +274,20 @@ async function initialize() {
     touchStart = null;
     if (Math.abs(horizontal) >= 80 && Math.abs(horizontal) > Math.abs(vertical) * 1.5) selectAdjacent(horizontal < 0 ? 1 : -1, true);
   }, { passive: true });
-  document.getElementById('order-date').addEventListener('change', event => { const date = event.target.value; if (date) { createOrder(date, activeOrder().delivery); render(); } });
-  document.getElementById('new-date').addEventListener('click', () => { const delivery = activeOrder().delivery; createOrder(nextOrderDate(activeDate), delivery); render(); });
+  document.getElementById('start-date-form').addEventListener('submit', event => {
+    event.preventDefault();
+    startOrder(document.getElementById('start-date').value);
+  });
+  document.getElementById('new-date').addEventListener('click', () => openDatePicker('new', nextOrderDate(activeDate || today)));
+  document.getElementById('date-picker').addEventListener('change', event => applyPickedDate(event.target.value));
+  document.getElementById('date-list').addEventListener('click', event => {
+    const button = event.target.closest('[data-date-action]');
+    if (!button) return;
+    const { date, dateAction } = button.dataset;
+    if (dateAction === 'open') { activeDate = date; render(); }
+    if (dateAction === 'edit') openDatePicker('edit', date, date);
+    if (dateAction === 'delete') deleteDate(date);
+  });
   document.getElementById('active-delivery').addEventListener('change', event => setActiveDelivery(event.target.value));
   document.getElementById('export-invoice').addEventListener('click', showInvoice);
   document.getElementById('close-invoice').addEventListener('click', closeInvoice);
@@ -226,6 +297,7 @@ async function initialize() {
   document.getElementById('invoice-modal').addEventListener('click', event => { if (event.target.id === 'invoice-modal') closeInvoice(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeInvoice(); });
   if (/Android/i.test(navigator.userAgent)) document.body.classList.add('android');
+  showStartDatePrompt();
 }
 
 initialize().catch(error => { document.getElementById('menu').innerHTML = `<p class="status-message">${error.message} Please open this site through GitHub Pages or another web server.</p>`; });
