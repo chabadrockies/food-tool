@@ -1,4 +1,4 @@
-﻿let categories = [];
+let categories = [];
 let items = [];
 let deliveryMethods = {};
 const orders = {};
@@ -124,11 +124,11 @@ function selectAdjacent(direction, animate = false) {
 }
 let datePickerAction = null;
 let dateBeingEdited = null;
-function openDatePicker(action, value, editingDate = null) {
+function openDatePicker(action, editingDate = null) {
   datePickerAction = action;
   dateBeingEdited = editingDate;
   const picker = document.getElementById('date-picker');
-  picker.value = value;
+  picker.value = '';
   picker.focus({ preventScroll: true });
   try { picker.showPicker(); } catch { picker.click(); }
 }
@@ -277,14 +277,14 @@ async function initialize() {
     event.preventDefault();
     startOrder(document.getElementById('start-date').value);
   });
-  document.getElementById('new-date').addEventListener('click', () => openDatePicker('new', nextOrderDate(activeDate || today)));
+  document.getElementById('new-date').addEventListener('click', () => openDatePicker('new'));
   document.getElementById('date-picker').addEventListener('change', event => applyPickedDate(event.target.value));
   document.getElementById('date-list').addEventListener('click', event => {
     const button = event.target.closest('[data-date-action]');
     if (!button) return;
     const { date, dateAction } = button.dataset;
     if (dateAction === 'open') { activeDate = date; render(); }
-    if (dateAction === 'edit') openDatePicker('edit', date, date);
+    if (dateAction === 'edit') openDatePicker('edit', date);
     if (dateAction === 'delete') deleteDate(date);
   });
   document.getElementById('active-delivery').addEventListener('change', event => setActiveDelivery(event.target.value));
