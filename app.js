@@ -1,4 +1,4 @@
-let categories = [];
+﻿let categories = [];
 let items = [];
 let deliveryMethods = {};
 const orders = {};
@@ -172,11 +172,10 @@ function startOrder(date) {
 function escapeHtml(value) { return value.replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&#39;' }[character])); }
 function ordinal(day) { const remainder = day % 100; if (remainder >= 11 && remainder <= 13) return `${day}th`; return `${day}${({ 1: 'st', 2: 'nd', 3: 'rd' }[day % 10] || 'th')}`; }
 function invoiceDateLabel(value) { const date = new Date(`${value}T12:00:00`); const weekday = date.toLocaleDateString('en-CA', { weekday: 'long' }); const month = date.toLocaleDateString('en-CA', { month: 'long' }); return `${weekday}, ${month} ${ordinal(date.getDate())}`; }
-function pluralize(name) { return /s$/i.test(name) ? name : `${name}s`; }
 function invoiceItemLine(item, quantity) {
   return quantity === 1
     ? `1 ${item.name} — ${money(item.price)}`
-    : `${quantity} ${pluralize(item.name)} — ${money(item.price)} × ${quantity} = ${money(item.price * quantity)}`;
+    : `${quantity} ${item.name} — ${money(item.price)} × ${quantity} = ${money(item.price * quantity)}`;
 }
 function invoiceItemMarkup(line) {
   const escaped = escapeHtml(line);
@@ -230,7 +229,7 @@ function invoicePlainText() {
 }
 function toggleInvoiceFormat() {
   invoiceFormat = invoiceFormat === 'email' ? 'whatsapp' : 'email';
-  document.getElementById('format-toggle').textContent = invoiceFormat === 'email' ? 'For Gmail' : 'For WhatsApp';
+  document.getElementById('format-toggle').textContent = invoiceFormat === 'email' ? 'Whatsapp Mode' : 'Gmail Mode';
   if (!document.getElementById('invoice-modal').hidden) showInvoice();
 }
 async function copyInvoice() {
