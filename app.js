@@ -198,10 +198,29 @@ function invoiceData() {
   };
 }
 function invoiceSummaryMarkup(invoice) {
-  return `<div class="invoice-summary"><div><strong>Meals Subtotal:</strong> <strong>${money(invoice.foodSubtotal)} USD</strong></div><div><strong>Delivery Charges:</strong> <strong>${money(invoice.deliveryTotal)} USD</strong></div><div><strong>Weekday Meals Total:</strong> <strong>${money(invoice.grandTotal)} USD</strong></div></div>`;
+  const lines = [];
+  if (invoice.foodSubtotal !== invoice.grandTotal) lines.push(`<div><strong>Meals Subtotal:</strong> <strong>${money(invoice.foodSubtotal)} USD</strong></div>`);
+  if (invoice.deliveryTotal) lines.push(`<div><strong>Delivery Charges:</strong> <strong>${money(invoice.deliveryTotal)} USD</strong></div>`);
+  lines.push(`<div><strong>Weekday Meals Total:</strong> <strong>${money(invoice.grandTotal)} USD</strong></div>`);
+  return `<div class="invoice-summary">${lines.join('')}</div>`;
+}
+function invoiceDeliveryMarkup(delivery) {
+  return delivery.fee
+    ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} — <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong> TBD</div>`
+    : '<div><strong>Pick-up:</strong> TBD</div>';
+}
+function invoiceDeliveryText(delivery) {
+  return delivery.fee
+    ? [`Delivery: ${delivery.name} — ${money(delivery.fee)}`, 'Delivery Time: TBD']
+    : ['Pick-up: TBD'];
+}
+function whatsappDeliveryText(delivery) {
+  return delivery.fee
+    ? [`*Delivery:* ${delivery.name} — *${money(delivery.fee)}*`, '*Delivery Time:* TBD']
+    : ['*Pick-up:* TBD'];
 }
 function emailInvoiceMarkup(invoice, showDelivery) {
-  return `<h1 id="invoice-title"><strong>Kosher Food Order Summary</strong></h1>${invoice.sections.map(section => `<section><h2><strong>${invoiceDateLabel(section.date)}</strong></h2>${showDelivery ? `<div class="delivery-details"><div><strong>Delivery:</strong> ${escapeHtml(section.delivery.name)} — <strong>${money(section.delivery.fee)}</strong></div><div><strong>Delivery Time:</strong> TBD</div></div>` : ''}<div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
+  return `<h1 id="invoice-title"><strong>Kosher Food Order Summary</strong></h1>${invoice.sections.map(section => `<section><h2><strong>${invoiceDateLabel(section.date)}</strong></h2>${showDelivery ? `<div class="delivery-details">${invoiceDeliveryMarkup(section.delivery)}</div>` : ''}<div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
 }
 function whatsappItemLine(line) {
   return line.includes(' = ')
@@ -209,9 +228,12 @@ function whatsappItemLine(line) {
     : line.replace(/(\$[\d,]+)$/g, '*$1*');
 }
 function whatsappInvoiceText(invoice, showDelivery) {
-  return [`*Kosher Food Order Summary*`, '', ...invoice.sections.flatMap(section => [`*${invoiceDateLabel(section.date)}*`, ...(showDelivery ? [`*Delivery:* ${section.delivery.name} — *${money(section.delivery.fee)}*`, '*Delivery Time:* TBD'] : []), ...section.lines.map(whatsappItemLine), '']), `*Meals Subtotal:* *${money(invoice.foodSubtotal)} USD*`, `*Delivery Charges:* *${money(invoice.deliveryTotal)} USD*`, `*Weekday Meals Total:* *${money(invoice.grandTotal)} USD*`].join('\n');
-}
-function showInvoice() {
+  const summary = [];
+  if (invoice.foodSubtotal !== invoice.grandTotal) summary.push(`*Meals Subtotal:* *${money(invoice.foodSubtotal)} USD*`);
+  if (invoice.deliveryTotal) summary.push(`*Delivery Charges:* *${money(invoice.deliveryTotal)} USD*`);
+  summary.push(`*Weekday Meals Total:* *${money(invoice.grandTotal)} USD*`);
+  return [`*Kosher Food Order Summary*`, '', ...invoice.sections.flatMap(section => [`*${invoiceDateLabel(section.date)}*`, ...(showDelivery ? whatsappDeliveryText(section.delivery) : []), ...section.lines.map(whatsappItemLine), '']), ...summary].join('\n');
+}function showInvoice() {
   const invoice = invoiceData();
   
   const content = document.getElementById('invoice-content');
@@ -225,7 +247,11 @@ function closeInvoice() { document.getElementById('invoice-modal').hidden = true
 function invoicePlainText() {
   const invoice = invoiceData();
   
-  return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...(showDelivery ? [`Delivery: ${section.delivery.name} — ${money(section.delivery.fee)}`, 'Delivery Time: TBD'] : []), ...section.lines, '']), `Meals Subtotal: ${money(invoice.foodSubtotal)} USD`, `Delivery Charges: ${money(invoice.deliveryTotal)} USD`, `Weekday Meals Total: ${money(invoice.grandTotal)} USD`].join('\n');
+  const summary = [];
+  if (invoice.foodSubtotal !== invoice.grandTotal) summary.push(`Meals Subtotal: ${money(invoice.foodSubtotal)} USD`);
+  if (invoice.deliveryTotal) summary.push(`Delivery Charges: ${money(invoice.deliveryTotal)} USD`);
+  summary.push(`Weekday Meals Total: ${money(invoice.grandTotal)} USD`);
+  return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...(showDelivery ? invoiceDeliveryText(section.delivery) : []), ...section.lines, '']), ...summary].join('\n');
 }
 function toggleInvoiceFormat() {
   invoiceFormat = invoiceFormat === 'email' ? 'whatsapp' : 'email';
