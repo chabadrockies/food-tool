@@ -40,7 +40,7 @@
                     "price": 94
                 },
                 {
-                    "name": "Brisket/Roast Dinner",
+                    "name": "Roast Beef Dinner",
                     "price": 118
                 },
                 {
@@ -62,7 +62,11 @@
                     "price": 38
                 },
                 {
-                    "name": "Tuna on Bagel/Multi-Grain Roll",
+                    "name": "Tuna on Bagel",
+                    "price": 38
+                },
+                {
+                    "name": "Tuna on Multi-Grain Bread",
                     "price": 38
                 },
                 {
@@ -70,7 +74,11 @@
                     "price": 38
                 },
                 {
-                    "name": "Egg Salad on Bagel/Multi-Grain Roll",
+                    "name": "Egg Salad on Bagel",
+                    "price": 38
+                },
+                {
+                    "name": "Egg Salad on Multi-Grain Bread",
                     "price": 38
                 },
                 {
