@@ -1,7 +1,6 @@
 ﻿let categories = [];
 let items = [];
 const specialItems = [];
-let specialOrdersVisible = false;
 let deliveryMethods = {};
 const orders = {};
 let activeDate = '';
@@ -31,8 +30,8 @@ function categoryId(name) { return name.toLowerCase().replaceAll(' ', '-').repla
 function renderSpecialOrders() {
   const section = document.getElementById('special-orders');
   const order = activeOrder();
-  section.hidden = !order || !specialOrdersVisible;
-  if (!order || !specialOrdersVisible) return;
+  section.hidden = !order;
+  if (!order) return;
   document.getElementById('special-order-items').innerHTML = specialItems.map(item => {
     const index = items.indexOf(item);
     return menuTile(index, order.quantities[index]);
@@ -55,15 +54,15 @@ function menuTile(index, quantity) {
   const item = items[index];
   const safeName = escapeHtml(item.name);
   return `<article class="menu-tile">
-    <button class="tile-add" type="button" onclick="addItem(${index})" aria-label="Add ${safeName}">
-      <div class="item-name">${safeName}</div>
+    <button class="tile-add" type="button" onclick="addItem(${index})" aria-label="Add ${escapeHtml(item.name)}">
+      <div class="item-name">${escapeHtml(item.name)}</div>
       ${quantity ? '' : '<div class="add-hint">Tap to add</div>'}
     </button>
-    ${quantity ? `<div class="quantity-bar"><span class="selected-label">Added</span><div class="quantity-control"><button type="button" aria-label="Remove one ${safeName}" onclick="changeQuantity(${index},-1)">-</button><span class="quantity">${quantity}</span><button type="button" aria-label="Add one ${safeName}" onclick="changeQuantity(${index},1)">+</button></div></div>` : ''}
+    ${quantity ? `<div class="quantity-bar"><span class="selected-label">Added</span><div class="quantity-control"><button type="button" aria-label="Remove one ${escapeHtml(item.name)}" onclick="changeQuantity(${index},-1)">âˆ’</button><span class="quantity">${quantity}</span><button type="button" aria-label="Add one ${escapeHtml(item.name)}" onclick="changeQuantity(${index},1)">+</button></div></div>` : ''}
   </article>`;
 }
 function deliveryOptions(selected) {
-  return Object.values(deliveryMethods).map(method => `<option value="${method.id}" ${method.id === selected ? 'selected' : ''}>${escapeHtml(method.name)} - ${money(method.fee)}</option>`).join('');
+  return Object.values(deliveryMethods).map(method => `<option value="${method.id}" ${method.id === selected ? 'selected' : ''}>${method.name} â€” ${money(method.fee)}</option>`).join('');
 }
 function renderDateList() {
   const dates = Object.keys(orders).sort();
@@ -80,7 +79,7 @@ function renderTotals() {
   document.getElementById('date-totals').innerHTML = dates.map(date => {
     const order = orders[date];
     const selectedItems = items.map((item, index) => ({ item, quantity: order.quantities[index] })).filter(selection => selection.quantity);
-const itemList = selectedItems.length ? selectedItems.map(({ item, quantity }) => `<div class="selected-item"><span>${quantity} x ${escapeHtml(item.name)}</span><span>${money(quantity * item.price)}</span></div>`).join('') : '<p class="empty-selection">No food selected.</p>';
+    const itemList = selectedItems.length ? selectedItems.map(({ item, quantity }) => `<div class="selected-item"><span>${quantity} Ã— ${escapeHtml(item.name)}</span><span>${money(quantity * item.price)}</span></div>`).join('') : '<p class="empty-selection">No food selected.</p>';
     return `<section id="date-total-${date}" class="date-total ${date === activeDate ? 'current-date' : ''}">
       <span class="total-date">${dateLabel(date)}</span>
       <div class="selected-items">${itemList}</div>
@@ -131,7 +130,10 @@ function addSpecialItem(name, price) {
   const cleanName = name.trim();
   const cleanPrice = Number(price);
   const status = document.getElementById('special-order-status');
-  if (!cleanName || !Number.isFinite(cleanPrice) || cleanPrice < 0) { status.textContent = 'Enter a name and a valid price.'; return; }
+  if (!cleanName || !Number.isFinite(cleanPrice) || cleanPrice < 0) {
+    status.textContent = 'Enter a name and a valid price.';
+    return;
+  }
   const item = { name: cleanName, price: cleanPrice, special: true };
   specialItems.push(item);
   items.push(item);
@@ -205,21 +207,16 @@ function startOrder(date) {
   render();
 }
 function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character]));
+  return String(value).replace(/[&<>"']/g, character => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[character]));
 }
-function ordinal(day) {
-  const remainder = day % 100;
-  if (remainder >= 11 && remainder <= 13) return `${day}th`;
-  return `${day}${({ 1: 'st', 2: 'nd', 3: 'rd' }[day % 10] || 'th')}`;
-}
-function invoiceDateLabel(value) {
-  const date = new Date(`${value}T12:00:00`);
-  return `${date.toLocaleDateString('en-CA', { weekday: 'long' })}, ${date.toLocaleDateString('en-CA', { month: 'long' })} ${ordinal(date.getDate())}`;
-}
+function ordinal(day) { const remainder = day % 100; if (remainder >= 11 && remainder <= 13) return `${day}th`; return `${day}${({ 1: 'st', 2: 'nd', 3: 'rd' }[day % 10] || 'th')}`; }
+function invoiceDateLabel(value) { const date = new Date(`${value}T12:00:00`); const weekday = date.toLocaleDateString('en-CA', { weekday: 'long' }); const month = date.toLocaleDateString('en-CA', { month: 'long' }); return `${weekday}, ${month} ${ordinal(date.getDate())}`; }
 function invoiceItemLine(item, quantity) {
   return quantity === 1
-    ? `1 ${item.name} ${money(item.price)}`
-    : `${quantity} ${item.name} ${money(item.price)} x ${quantity} = ${money(item.price * quantity)}`;
+    ? `1 ${item.name} â€” ${money(item.price)}`
+    : `${quantity} ${item.name} â€” ${money(item.price)} Ã— ${quantity} = ${money(item.price * quantity)}`;
 }
 function invoiceItemMarkup(line) {
   const escaped = escapeHtml(line);
@@ -249,14 +246,18 @@ function invoiceSummaryMarkup(invoice) {
 }
 function invoiceDeliveryMarkup(delivery) {
   return delivery.fee
-    ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong></div>`
-    : '<div><strong>Pickup at:</strong> Chabad 216 Trapper Rise</div>';
+    ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} â€” <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong> TBD</div>`
+    : '<div><strong>Pick-up:</strong> TBD</div>';
 }
 function invoiceDeliveryText(delivery) {
-  return delivery.fee ? [`Delivery: ${delivery.name} ${money(delivery.fee)}`, 'Delivery Time:'] : ['Pickup at: Chabad 216 Trapper Rise'];
+  return delivery.fee
+    ? [`Delivery: ${delivery.name} â€” ${money(delivery.fee)}`, 'Delivery Time: TBD']
+    : ['Pick-up: TBD'];
 }
 function whatsappDeliveryText(delivery) {
-  return delivery.fee ? [`*Delivery:* ${delivery.name} *${money(delivery.fee)}*`, '*Delivery Time:*'] : ['*Pickup at:* Chabad 216 Trapper Rise'];
+  return delivery.fee
+    ? [`*Delivery:* ${delivery.name} â€” *${money(delivery.fee)}*`, '*Delivery Time:* TBD']
+    : ['*Pick-up:* TBD'];
 }
 function emailInvoiceMarkup(invoice, showDelivery) {
   return `<h1 id="invoice-title"><strong>Kosher Food Order Summary</strong></h1>${invoice.sections.map(section => `<section><h2><strong>${invoiceDateLabel(section.date)}</strong></h2>${showDelivery ? `<div class="delivery-details">${invoiceDeliveryMarkup(section.delivery)}</div>` : ''}<div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
@@ -343,15 +344,9 @@ async function initialize() {
     event.preventDefault();
     startOrder(document.getElementById('start-date').value);
   });
-document.getElementById('special-order-form').addEventListener('submit', event => {
+  document.getElementById('special-order-form').addEventListener('submit', event => {
     event.preventDefault();
     addSpecialItem(document.getElementById('special-order-name').value, document.getElementById('special-order-price').value);
-  });
-  document.getElementById('special-order-toggle').addEventListener('click', () => {
-    specialOrdersVisible = !specialOrdersVisible;
-    document.getElementById('special-order-toggle').classList.toggle('special-order-active', specialOrdersVisible);
-    renderSpecialOrders();
-    if (specialOrdersVisible) document.getElementById('special-order-name').focus();
   });
   document.getElementById('new-date').addEventListener('click', () => openDatePicker('new'));
   document.getElementById('date-picker').addEventListener('change', event => applyPickedDate(event.target.value));
