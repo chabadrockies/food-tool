@@ -217,12 +217,7 @@ function invoiceDateLabel(value) { const date = new Date(`${value}T12:00:00`); c
 function invoiceItemLine(item, quantity) {
   return quantity === 1 ? `1 ${item.name} ${money(item.price)}` : `${quantity} ${item.name} ${money(item.price)} x ${quantity} = ${money(item.price * quantity)}`;
 }
-function invoiceItemMarkup(line) {
-  const escaped = escapeHtml(line);
-  return line.includes(' = ')
-    ? escaped.replace(/(= )(\$[\d,]+)$/g, '$1<strong>$2</strong>')
-    : escaped.replace(/(\$[\d,]+)$/g, '<strong>$1</strong>');
-}
+function invoiceItemMarkup(line) { return escapeHtml(line); }
 function invoiceData() {
   const dates = Object.keys(orders).sort();
   const sections = dates.map(date => {
@@ -237,31 +232,26 @@ function invoiceData() {
 }
 function invoiceSummaryMarkup(invoice) {
   const lines = [];
-  if (invoice.deliveryTotal || invoice.surcharge) lines.push(`<div><strong>Meals Subtotal:</strong> <strong>${money(invoice.foodSubtotal)} USD</strong></div>`);
-  if (invoice.deliveryTotal) lines.push(`<div><strong>Delivery Charges:</strong> <strong>${money(invoice.deliveryTotal)} USD</strong></div>`);
-  if (invoice.surcharge) lines.push(`<div><strong>Surcharge (${Math.round(invoice.surchargeRate * 100)}%):</strong> <strong>${money(invoice.surcharge)} USD</strong></div>`);
-  lines.push(`<div><strong>Total:</strong> <strong>${money(invoice.grandTotal)} USD</strong></div>`);
+  if (invoice.deliveryTotal || invoice.surcharge) lines.push(`<div>Meals Subtotal: ${money(invoice.foodSubtotal)} USD</div>`);
+  if (invoice.deliveryTotal) lines.push(`<div>Delivery Charges: ${money(invoice.deliveryTotal)} USD</div>`);
+  if (invoice.surcharge) lines.push(`<div>Surcharge (${Math.round(invoice.surchargeRate * 100)}%): ${money(invoice.surcharge)} USD</div>`);
+  lines.push(`<div><strong>Total: ${money(invoice.grandTotal)} USD</strong></div>`);
   return `<div class="invoice-summary">${lines.join('')}</div>`;
 }
 function invoiceDeliveryMarkup(delivery) {
-  return delivery.fee ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong></div>` : '<div><strong>Pickup at:</strong> Chabad 216 Trapper Rise</div><div><strong>Pickup Time:</strong></div>';
+  return delivery.fee ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} ${money(delivery.fee)}</div><div><strong>Delivery Time:</strong></div>` : '<div><strong>Pickup at:</strong> Chabad 216 Trapper Rise</div><div><strong>Pickup Time:</strong></div>';
 }
 function invoiceDeliveryText(delivery) { return delivery.fee ? [`Delivery: ${delivery.name} ${money(delivery.fee)}`, 'Delivery Time:'] : ['Pickup at: Chabad 216 Trapper Rise', 'Pickup Time:']; }
-function whatsappDeliveryText(delivery) { return delivery.fee ? [`*Delivery:* ${delivery.name} *${money(delivery.fee)}*`, '*Delivery Time:*'] : ['*Pickup at:* Chabad 216 Trapper Rise', '*Pickup Time:*']; }
-function emailInvoiceMarkup(invoice) {
-  return `<h1 id="invoice-title"><strong>Kosher Food Order Summary</strong></h1>${invoice.sections.map(section => `<section><h2><strong>${invoiceDateLabel(section.date)}</strong></h2><div class="delivery-details">${invoiceDeliveryMarkup(section.delivery)}</div><div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
+function whatsappDeliveryText(delivery) {
+  return delivery.fee ? [`*Delivery:* ${delivery.name} ${money(delivery.fee)}`, '*Delivery Time:*'] : ['*Pickup at:* Chabad 216 Trapper Rise', '*Pickup Time:*'];
 }
-function whatsappItemLine(line) {
-  return line.includes(' = ')
-    ? line.replace(/(= )(\$[\d,]+)$/g, '$1*$2*')
-    : line.replace(/(\$[\d,]+)$/g, '*$1*');
-}
+function whatsappItemLine(line) { return line; }
 function whatsappInvoiceText(invoice) {
   const summary = [];
-  if (invoice.deliveryTotal || invoice.surcharge) summary.push(`*Meals Subtotal:* *${money(invoice.foodSubtotal)} USD*`);
-  if (invoice.deliveryTotal) summary.push(`*Delivery Charges:* *${money(invoice.deliveryTotal)} USD*`);
-  if (invoice.surcharge) summary.push(`*Surcharge (${Math.round(invoice.surchargeRate * 100)}%):* *${money(invoice.surcharge)} USD*`);
-  summary.push(`*Total:* *${money(invoice.grandTotal)} USD*`);
+  if (invoice.deliveryTotal || invoice.surcharge) summary.push(`Meals Subtotal: ${money(invoice.foodSubtotal)} USD`);
+  if (invoice.deliveryTotal) summary.push(`Delivery Charges: ${money(invoice.deliveryTotal)} USD`);
+  if (invoice.surcharge) summary.push(`Surcharge (${Math.round(invoice.surchargeRate * 100)}%): ${money(invoice.surcharge)} USD`);
+  summary.push(`*Total: ${money(invoice.grandTotal)} USD*`);
   return [`*Kosher Food Order Summary*`, '', ...invoice.sections.flatMap(section => [`*${invoiceDateLabel(section.date)}*`, ...whatsappDeliveryText(section.delivery), ...section.lines.map(whatsappItemLine), '']), ...summary].join('\n');
 }function showInvoice() {
   const invoice = invoiceData();

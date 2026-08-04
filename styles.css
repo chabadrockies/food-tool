@@ -79,8 +79,8 @@ button, select, input { font:inherit; }
 .close-button { font-size:1.5rem; line-height:1; }
 .invoice-content { padding:26px; line-height:1.6; }
 .invoice-content.whatsapp-format { white-space:pre-wrap; font-family:Arial,sans-serif; }
-.invoice-content h1 { font-size:1.35rem; margin:0 0 24px; }
-.invoice-content h2 { font-size:1.05rem; margin:24px 0 10px; }
+.invoice-title { margin:0 0 24px; }
+.invoice-date { margin:24px 0 10px; }
 .delivery-details { border-left:3px solid var(--accent); margin:0 0 16px; padding-left:12px; }
 .invoice-items { margin-left:14px; }
 .invoice-line { margin:11px 0; }
