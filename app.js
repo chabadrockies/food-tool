@@ -136,7 +136,7 @@ function applyPickedDate(date) {
   if (!date) return;
   if (datePickerAction === 'new') {
     if (orders[date]) { activeDate = date; render(); return; }
-    createOrder(date, activeOrder() ? activeOrder().delivery : '');
+    createOrder(date, activeOrder() ? activeOrder().delivery : 'pickup');
     render();
     return;
   }
@@ -206,12 +206,12 @@ function invoiceSummaryMarkup(invoice) {
 }
 function invoiceDeliveryMarkup(delivery) {
   return delivery.fee
-    ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} — <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong></div>`
-    : '<div><strong>Pickup Location:</strong> Chabad 216 Trapper Rise</div>';
+    ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} — <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong> TBD</div>`
+    : '<div><strong>Pick-up:</strong> TBD</div>';
 }
 function invoiceDeliveryText(delivery) {
   return delivery.fee
-    ? [`Delivery: ${delivery.name} — ${money(delivery.fee)}`, 'Delivery Time: \']
+    ? [`Delivery: ${delivery.name} — ${money(delivery.fee)}`, 'Delivery Time: TBD']
     : ['Pick-up: TBD'];
 }
 function whatsappDeliveryText(delivery) {
