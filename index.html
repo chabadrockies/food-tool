@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -23,6 +23,16 @@
     <div class="app-layout">
       <section class="menu-area" aria-label="Menu">
         <p id="active-date-message" class="date-title"></p>
+        <section id="special-orders" class="special-orders w3-white" aria-labelledby="special-orders-heading" hidden>
+          <div class="special-orders-heading"><div><h2 id="special-orders-heading">Special Orders</h2><p>Session only — available for any date in this order.</p></div></div>
+          <form id="special-order-form" class="special-order-form">
+            <label><span>Name</span><input id="special-order-name" class="w3-input w3-border" type="text" maxlength="100" required placeholder="e.g. Special platter"></label>
+            <label><span>Price</span><input id="special-order-price" class="w3-input w3-border" type="number" min="0" step="0.01" required placeholder="0.00"></label>
+            <button class="w3-button special-order-button" type="submit">Create special item</button>
+          </form>
+          <p id="special-order-status" class="special-order-status" aria-live="polite"></p>
+          <div id="special-order-items" class="menu-grid"></div>
+        </section>
         <div id="menu"></div>
       </section>
 
