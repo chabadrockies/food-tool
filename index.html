@@ -2,10 +2,10 @@
 <html lang="en">
 
 <head>
-	<meta charset="utf-8">
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="Internal food order entry tool">
-	<title>Chabad Food | Order Entry</title>
+	<title>Food Tool</title>
 	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 	<link rel="stylesheet" href="styles.css"> </head>
 
@@ -24,11 +24,21 @@
     <div class="app-layout">
       <section class="menu-area" aria-label="Menu">
         <p id="active-date-message" class="date-title"></p>
-        <div id="menu"></div>
+        <section id="special-orders" class="special-orders w3-white" aria-labelledby="special-orders-heading" hidden>
+  <div class="special-orders-heading"><div><h2 id="special-orders-heading">Special Orders</h2><p>Session only - available for any date in this order.</p></div></div>
+  <form id="special-order-form" class="special-order-form">
+    <label><span>Name</span><input id="special-order-name" class="w3-input w3-border" type="text" maxlength="100" required placeholder="e.g. Special platter"></label>
+    <label><span>Price</span><input id="special-order-price" class="w3-input w3-border" type="number" min="0" step="0.01" required placeholder="0.00"></label>
+    <button class="w3-button special-order-button" type="submit">Create special item</button>
+  </form>
+  <p id="special-order-status" class="special-order-status" aria-live="polite"></p>
+  <div id="special-order-items" class="menu-grid"></div>
+</section>
+<div id="menu"></div>
       </section>
 
       <aside class="totals-panel w3-white w3-card-2" aria-labelledby="totals-heading">
-        <div class="totals-heading"><h1 id="totals-heading">Totals by date</h1><button id="export-invoice" class="w3-button export-button" type="button">Export invoice</button></div>
+        <div class="totals-heading"><h1 id="totals-heading">Totals by date</h1><div class="totals-actions"><button id="special-order-toggle" class="w3-button format-button" type="button">Special Order</button><button id="export-invoice" class="w3-button export-button" type="button">Export invoice</button></div></div>
         <div id="totals-content" class="totals-content"><div id="date-totals"></div></div>
         <div class="totals-footer"><div class="all-totals"><div><span>Food subtotal</span><span class="total-caption">No delivery</span></div><strong id="food-subtotal">$0</strong></div><div class="grand-total"><span>All dates total</span><span id="grand-total">$0</span></div></div>
       </aside>
