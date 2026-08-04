@@ -7,6 +7,7 @@ const orders = {};
 let activeDate = '';
 let invoiceFormat = 'email';
 let showDelivery = false;
+let surchargeRate = 0;
 let sidebarManuallyScrolled = false;
 let programmaticSidebarScroll = false;
 
@@ -24,6 +25,7 @@ function createOrder(date, delivery = 'pickup') {
 function activeOrder() { return orders[activeDate]; }
 function foodTotal(order) { return order.quantities.reduce((total, quantity, index) => total + quantity * items[index].price, 0); }
 function orderTotal(order) { return foodTotal(order) + deliveryMethods[order.delivery].fee; }
+function surchargeAmount(food, delivery) { return Math.round((food + delivery) * surchargeRate * 100) / 100; }
 function categoryId(name) { return name.toLowerCase().replaceAll(' ', '-').replaceAll('&', 'and'); }
 
 function renderSpecialOrders() {
@@ -87,8 +89,12 @@ const itemList = selectedItems.length ? selectedItems.map(({ item, quantity }) =
     </section>`;
   }).join('');
   const foodSubtotal = dates.reduce((total, date) => total + foodTotal(orders[date]), 0);
-  const grandTotal = dates.reduce((total, date) => total + orderTotal(orders[date]), 0);
+  const deliveryTotal = dates.reduce((total, date) => total + deliveryMethods[orders[date].delivery].fee, 0);
+  const surcharge = surchargeAmount(foodSubtotal, deliveryTotal);
+  const grandTotal = foodSubtotal + deliveryTotal + surcharge;
   document.getElementById('food-subtotal').textContent = money(foodSubtotal);
+  document.getElementById('surcharge-label').textContent = surchargeRate ? `Surcharge (${Math.round(surchargeRate * 100)}%)` : 'Surcharge';
+  document.getElementById('surcharge-total').textContent = money(surcharge);
   document.getElementById('grand-total').textContent = money(grandTotal);
   if (sidebarManuallyScrolled) totalsContent.scrollTop = savedScrollTop;
   else scrollSidebarToCurrentDate();
@@ -228,17 +234,16 @@ function invoiceData() {
     const lines = items.map((item, index) => ({ item, quantity: order.quantities[index] })).filter(selection => selection.quantity).map(({ item, quantity }) => invoiceItemLine(item, quantity));
     return { date, lines, delivery: deliveryMethods[order.delivery], total: orderTotal(order) };
   });
-  return {
-    sections,
-    foodSubtotal: dates.reduce((total, date) => total + foodTotal(orders[date]), 0),
-    deliveryTotal: dates.reduce((total, date) => total + deliveryMethods[orders[date].delivery].fee, 0),
-    grandTotal: dates.reduce((total, date) => total + orderTotal(orders[date]), 0)
-  };
+  const foodSubtotal = dates.reduce((total, date) => total + foodTotal(orders[date]), 0);
+  const deliveryTotal = dates.reduce((total, date) => total + deliveryMethods[orders[date].delivery].fee, 0);
+  const surcharge = surchargeAmount(foodSubtotal, deliveryTotal);
+  return { sections, foodSubtotal, deliveryTotal, surcharge, surchargeRate, grandTotal: foodSubtotal + deliveryTotal + surcharge };
 }
 function invoiceSummaryMarkup(invoice) {
   const lines = [];
-  if (invoice.foodSubtotal !== invoice.grandTotal) lines.push(`<div><strong>Meals Subtotal:</strong> <strong>${money(invoice.foodSubtotal)} USD</strong></div>`);
+  if (invoice.deliveryTotal || invoice.surcharge) lines.push(`<div><strong>Meals Subtotal:</strong> <strong>${money(invoice.foodSubtotal)} USD</strong></div>`);
   if (invoice.deliveryTotal) lines.push(`<div><strong>Delivery Charges:</strong> <strong>${money(invoice.deliveryTotal)} USD</strong></div>`);
+  if (invoice.surcharge) lines.push(`<div><strong>Surcharge (${Math.round(invoice.surchargeRate * 100)}%):</strong> <strong>${money(invoice.surcharge)} USD</strong></div>`);
   lines.push(`<div><strong>Total:</strong> <strong>${money(invoice.grandTotal)} USD</strong></div>`);
   return `<div class="invoice-summary">${lines.join('')}</div>`;
 }
@@ -263,8 +268,9 @@ function whatsappItemLine(line) {
 }
 function whatsappInvoiceText(invoice, showDelivery) {
   const summary = [];
-  if (invoice.foodSubtotal !== invoice.grandTotal) summary.push(`*Meals Subtotal:* *${money(invoice.foodSubtotal)} USD*`);
+  if (invoice.deliveryTotal || invoice.surcharge) summary.push(`*Meals Subtotal:* *${money(invoice.foodSubtotal)} USD*`);
   if (invoice.deliveryTotal) summary.push(`*Delivery Charges:* *${money(invoice.deliveryTotal)} USD*`);
+  if (invoice.surcharge) summary.push(`*Surcharge (${Math.round(invoice.surchargeRate * 100)}%):* *${money(invoice.surcharge)} USD*`);
   summary.push(`*Total:* *${money(invoice.grandTotal)} USD*`);
   return [`*Kosher Food Order Summary*`, '', ...invoice.sections.flatMap(section => [`*${invoiceDateLabel(section.date)}*`, ...(showDelivery ? whatsappDeliveryText(section.delivery) : []), ...section.lines.map(whatsappItemLine), '']), ...summary].join('\n');
 }function showInvoice() {
@@ -280,10 +286,10 @@ function whatsappInvoiceText(invoice, showDelivery) {
 function closeInvoice() { document.getElementById('invoice-modal').hidden = true; }
 function invoicePlainText() {
   const invoice = invoiceData();
-  
   const summary = [];
-  if (invoice.foodSubtotal !== invoice.grandTotal) summary.push(`Meals Subtotal: ${money(invoice.foodSubtotal)} USD`);
+  if (invoice.deliveryTotal || invoice.surcharge) summary.push(`Meals Subtotal: ${money(invoice.foodSubtotal)} USD`);
   if (invoice.deliveryTotal) summary.push(`Delivery Charges: ${money(invoice.deliveryTotal)} USD`);
+  if (invoice.surcharge) summary.push(`Surcharge (${Math.round(invoice.surchargeRate * 100)}%): ${money(invoice.surcharge)} USD`);
   summary.push(`Total: ${money(invoice.grandTotal)} USD`);
   return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...(showDelivery ? invoiceDeliveryText(section.delivery) : []), ...section.lines, '']), ...summary].join('\n');
 }
@@ -358,6 +364,7 @@ document.getElementById('special-order-form').addEventListener('submit', event =
     if (dateAction === 'delete') deleteDate(date);
   });
   document.getElementById('active-delivery').addEventListener('change', event => setActiveDelivery(event.target.value));
+  document.getElementById('surcharge-rate').addEventListener('change', event => { surchargeRate = Number(event.target.value); renderTotals(); if (!document.getElementById('invoice-modal').hidden) showInvoice(); });
   document.getElementById('export-invoice').addEventListener('click', showInvoice);
   document.getElementById('close-invoice').addEventListener('click', closeInvoice);
   document.getElementById('copy-invoice').addEventListener('click', copyInvoice);

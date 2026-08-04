@@ -18,8 +18,9 @@ button, select, input { font:inherit; }
 .date-chip-action:hover { background:#dcd6c7; }
 .date-chip-open:hover { background:#f4f1e9; }
 .delete-date { color:#8b3d35; }
-.active-delivery-control { display:flex; align-items:center; gap:7px; font:inherit; }
+.active-delivery-control, .active-surcharge-control { display:flex; align-items:center; gap:7px; font:inherit; }
 .active-delivery-control select { min-width:185px; }
+.active-surcharge-control select { min-width:92px; }
 .nav-button { background:#e8e5dd; white-space:nowrap; }
 .new-button { background:var(--brand); color:#fff; white-space:nowrap; }
 .date-picker { position:fixed; inline-size:1px; block-size:1px; opacity:0; pointer-events:none; }
@@ -105,4 +106,4 @@ button, select, input { font:inherit; }
 @media(max-width:600px) { .menu-area.date-slide-next { animation:date-slide-next .3s ease-out; } .menu-area.date-slide-previous { animation:date-slide-previous .3s ease-out; } }@media(max-width:900px) { .app-layout { grid-template-columns:1fr; } .totals-panel { position:static; height:auto; overflow:visible; } .totals-content { overflow:visible; } }
 body.android .totals-content, body.android .totals-footer, body.android .totals-heading h1 { display:none; }
 body.android .totals-panel { border-top:0; }
-@media(max-width:600px) { .special-order-form { grid-template-columns:1fr 100px; } .special-order-button { grid-column:1 / -1; } .date-manager { position:static; padding:12px; } .date-manager h1 { font-size:1.2rem; } .date-manager-heading { align-items:flex-start; } .new-button { padding:8px 10px; } .date-list { margin-inline:-2px; } .active-delivery-control { width:100%; margin-left:0; } .active-delivery-control select { flex:1; min-width:0; } .invoice-actions { flex-wrap:wrap; } .app-shell { padding:12px; } .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .menu-tile,.tile-add { min-height:160px; } .tile-add { padding:12px; } .item-name { font-size:.98rem; } }
+@media(max-width:600px) { .special-order-form { grid-template-columns:1fr 100px; } .special-order-button { grid-column:1 / -1; } .date-manager { position:static; padding:12px; } .date-manager h1 { font-size:1.2rem; } .date-manager-heading { align-items:flex-start; } .new-button { padding:8px 10px; } .date-list { margin-inline:-2px; } .active-delivery-control, .active-surcharge-control { width:100%; margin-left:0; } .active-delivery-control select, .active-surcharge-control select { flex:1; min-width:0; } .invoice-actions { flex-wrap:wrap; } .app-shell { padding:12px; } .menu-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; } .menu-tile,.tile-add { min-height:160px; } .tile-add { padding:12px; } .item-name { font-size:.98rem; } }
