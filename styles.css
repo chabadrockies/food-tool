@@ -18,7 +18,7 @@ button, select, input { font:inherit; }
 .date-chip-action:hover { background:#dcd6c7; }
 .date-chip-open:hover { background:#f4f1e9; }
 .delete-date { color:#8b3d35; }
-.active-delivery-control, .active-surcharge-control { display:inline-flex; align-items:center; gap:7px; margin-right:12px; vertical-align:middle; font:inherit; }
+.active-delivery-control, .active-surcharge-control { display:flex; align-items:center; gap:7px; font:inherit; }
 .active-delivery-control select { min-width:185px; }
 .active-surcharge-control select { min-width:92px; }
 .nav-button { background:#e8e5dd; white-space:nowrap; }
