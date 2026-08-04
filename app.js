@@ -6,7 +6,6 @@ let deliveryMethods = {};
 const orders = {};
 let activeDate = '';
 let invoiceFormat = 'email';
-let showDelivery = false;
 let surchargeRate = 0;
 let sidebarManuallyScrolled = false;
 let programmaticSidebarScroll = false;
@@ -245,32 +244,32 @@ function invoiceSummaryMarkup(invoice) {
   return `<div class="invoice-summary">${lines.join('')}</div>`;
 }
 function invoiceDeliveryMarkup(delivery) {
-  return delivery.fee ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong></div>` : '<div><strong>Pickup at:</strong> Chabad 216 Trapper Rise</div>';
+  return delivery.fee ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong></div>` : '<div><strong>Pickup at:</strong> Chabad 216 Trapper Rise</div><div><strong>Pickup Time:</strong></div>';
 }
-function invoiceDeliveryText(delivery) { return delivery.fee ? [`Delivery: ${delivery.name} ${money(delivery.fee)}`, 'Delivery Time:'] : ['Pickup at: Chabad 216 Trapper Rise']; }
-function whatsappDeliveryText(delivery) { return delivery.fee ? [`*Delivery:* ${delivery.name} *${money(delivery.fee)}*`, '*Delivery Time:*'] : ['*Pickup at:* Chabad 216 Trapper Rise']; }
-function emailInvoiceMarkup(invoice, showDelivery) {
-  return `<h1 id="invoice-title"><strong>Kosher Food Order Summary</strong></h1>${invoice.sections.map(section => `<section><h2><strong>${invoiceDateLabel(section.date)}</strong></h2>${showDelivery ? `<div class="delivery-details">${invoiceDeliveryMarkup(section.delivery)}</div>` : ''}<div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
+function invoiceDeliveryText(delivery) { return delivery.fee ? [`Delivery: ${delivery.name} ${money(delivery.fee)}`, 'Delivery Time:'] : ['Pickup at: Chabad 216 Trapper Rise', 'Pickup Time:']; }
+function whatsappDeliveryText(delivery) { return delivery.fee ? [`*Delivery:* ${delivery.name} *${money(delivery.fee)}*`, '*Delivery Time:*'] : ['*Pickup at:* Chabad 216 Trapper Rise', '*Pickup Time:*']; }
+function emailInvoiceMarkup(invoice) {
+  return `<h1 id="invoice-title"><strong>Kosher Food Order Summary</strong></h1>${invoice.sections.map(section => `<section><h2><strong>${invoiceDateLabel(section.date)}</strong></h2><div class="delivery-details">${invoiceDeliveryMarkup(section.delivery)}</div><div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
 }
 function whatsappItemLine(line) {
   return line.includes(' = ')
     ? line.replace(/(= )(\$[\d,]+)$/g, '$1*$2*')
     : line.replace(/(\$[\d,]+)$/g, '*$1*');
 }
-function whatsappInvoiceText(invoice, showDelivery) {
+function whatsappInvoiceText(invoice) {
   const summary = [];
   if (invoice.deliveryTotal || invoice.surcharge) summary.push(`*Meals Subtotal:* *${money(invoice.foodSubtotal)} USD*`);
   if (invoice.deliveryTotal) summary.push(`*Delivery Charges:* *${money(invoice.deliveryTotal)} USD*`);
   if (invoice.surcharge) summary.push(`*Surcharge (${Math.round(invoice.surchargeRate * 100)}%):* *${money(invoice.surcharge)} USD*`);
   summary.push(`*Total:* *${money(invoice.grandTotal)} USD*`);
-  return [`*Kosher Food Order Summary*`, '', ...invoice.sections.flatMap(section => [`*${invoiceDateLabel(section.date)}*`, ...(showDelivery ? whatsappDeliveryText(section.delivery) : []), ...section.lines.map(whatsappItemLine), '']), ...summary].join('\n');
+  return [`*Kosher Food Order Summary*`, '', ...invoice.sections.flatMap(section => [`*${invoiceDateLabel(section.date)}*`, ...whatsappDeliveryText(section.delivery), ...section.lines.map(whatsappItemLine), '']), ...summary].join('\n');
 }function showInvoice() {
   const invoice = invoiceData();
   
   const content = document.getElementById('invoice-content');
   content.classList.toggle('whatsapp-format', invoiceFormat === 'whatsapp');
-  if (invoiceFormat === 'whatsapp') content.textContent = whatsappInvoiceText(invoice, showDelivery);
-  else content.innerHTML = emailInvoiceMarkup(invoice, showDelivery);
+  if (invoiceFormat === 'whatsapp') content.textContent = whatsappInvoiceText(invoice);
+  else content.innerHTML = emailInvoiceMarkup(invoice);
   document.getElementById('copy-status').textContent = '';
   document.getElementById('invoice-modal').hidden = false;
 }
@@ -282,7 +281,7 @@ function invoicePlainText() {
   if (invoice.deliveryTotal) summary.push(`Delivery Charges: ${money(invoice.deliveryTotal)} USD`);
   if (invoice.surcharge) summary.push(`Surcharge (${Math.round(invoice.surchargeRate * 100)}%): ${money(invoice.surcharge)} USD`);
   summary.push(`Total: ${money(invoice.grandTotal)} USD`);
-  return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...(showDelivery ? invoiceDeliveryText(section.delivery) : []), ...section.lines, '']), ...summary].join('\n');
+  return ['Kosher Food Order Summary', '', ...invoice.sections.flatMap(section => [invoiceDateLabel(section.date), ...invoiceDeliveryText(section.delivery), ...section.lines, '']), ...summary].join('\n');
 }
 function toggleInvoiceFormat() {
   invoiceFormat = invoiceFormat === 'email' ? 'whatsapp' : 'email';
@@ -290,7 +289,7 @@ function toggleInvoiceFormat() {
   if (!document.getElementById('invoice-modal').hidden) showInvoice();
 }
 async function copyInvoice() {
-  const text = invoiceFormat === 'whatsapp' ? whatsappInvoiceText(invoiceData(), showDelivery) : invoicePlainText();
+  const text = invoiceFormat === 'whatsapp' ? whatsappInvoiceText(invoiceData()) : invoicePlainText();
   const html = document.getElementById('invoice-content').innerHTML;
   try {
     if (invoiceFormat === 'email' && navigator.clipboard && window.ClipboardItem) {
@@ -360,7 +359,6 @@ async function initialize() {
   document.getElementById('export-invoice').addEventListener('click', showInvoice);
   document.getElementById('close-invoice').addEventListener('click', closeInvoice);
   document.getElementById('copy-invoice').addEventListener('click', copyInvoice);
-  document.getElementById('delivery-toggle').addEventListener('click',()=>{showDelivery=!showDelivery;document.getElementById('delivery-toggle').textContent=showDelivery?'Hide Delivery':'Show Delivery';if(!document.getElementById('invoice-modal').hidden)showInvoice();});
   document.getElementById('format-toggle').addEventListener('click', toggleInvoiceFormat);
   document.getElementById('invoice-modal').addEventListener('click', event => { if (event.target.id === 'invoice-modal') closeInvoice(); });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeInvoice(); });
