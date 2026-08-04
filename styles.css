@@ -72,6 +72,7 @@ button, select, input { font:inherit; }
 .delivery-toggle input:checked + .toggle-slider { background:var(--brand); }
 .delivery-toggle input:checked + .toggle-slider::after { transform:translateX(14px); }
 .format-button { background:#e8e5dd; white-space:nowrap; }
+.special-order-active { background:#315c42!important; color:#fff!important; }
 .copy-button { background:var(--brand); color:#fff; }
 .close-button { font-size:1.5rem; line-height:1; }
 .invoice-content { padding:26px; line-height:1.6; }

@@ -244,14 +244,14 @@ function invoiceSummaryMarkup(invoice) {
 }
 function invoiceDeliveryMarkup(delivery) {
   return delivery.fee
-    ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong> TBD</div>`
-    : '<div><strong>Pick-up:</strong> TBD</div>';
+    ? `<div><strong>Delivery:</strong> ${escapeHtml(delivery.name)} <strong>${money(delivery.fee)}</strong></div><div><strong>Delivery Time:</strong></div>`
+    : '<div><strong>Pickup at:</strong> Chabad 216 Trapper Rise</div>';
 }
 function invoiceDeliveryText(delivery) {
-  return delivery.fee ? [`Delivery: ${delivery.name} ${money(delivery.fee)}`, 'Delivery Time: TBD'] : ['Pick-up: TBD'];
+  return delivery.fee ? [`Delivery: ${delivery.name} ${money(delivery.fee)}`, 'Delivery Time:'] : ['Pickup at: Chabad 216 Trapper Rise'];
 }
 function whatsappDeliveryText(delivery) {
-  return delivery.fee ? [`*Delivery:* ${delivery.name} *${money(delivery.fee)}*`, '*Delivery Time:* TBD'] : ['*Pick-up:* TBD'];
+  return delivery.fee ? [`*Delivery:* ${delivery.name} *${money(delivery.fee)}*`, '*Delivery Time:*'] : ['*Pickup at:* Chabad 216 Trapper Rise'];
 }
 function emailInvoiceMarkup(invoice, showDelivery) {
   return `<h1 id="invoice-title"><strong>Kosher Food Order Summary</strong></h1>${invoice.sections.map(section => `<section><h2><strong>${invoiceDateLabel(section.date)}</strong></h2>${showDelivery ? `<div class="delivery-details">${invoiceDeliveryMarkup(section.delivery)}</div>` : ''}<div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
@@ -343,7 +343,7 @@ document.getElementById('special-order-form').addEventListener('submit', event =
   });
   document.getElementById('special-order-toggle').addEventListener('click', () => {
     specialOrdersVisible = !specialOrdersVisible;
-    document.getElementById('special-order-toggle').classList.toggle('w3-green', specialOrdersVisible);
+    document.getElementById('special-order-toggle').classList.toggle('special-order-active', specialOrdersVisible);
     renderSpecialOrders();
     if (specialOrdersVisible) document.getElementById('special-order-name').focus();
   });
