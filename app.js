@@ -1,5 +1,6 @@
 ﻿let categories = [];
 let items = [];
+let specialOrdersVisible = false;
 const specialItems = [];
 let deliveryMethods = {};
 const orders = {};
@@ -30,12 +31,19 @@ function categoryId(name) { return name.toLowerCase().replaceAll(' ', '-').repla
 function renderSpecialOrders() {
   const section = document.getElementById('special-orders');
   const order = activeOrder();
-  section.hidden = !order;
-  if (!order) return;
+  section.hidden = !order || !specialOrdersVisible;
+  if (!order || !specialOrdersVisible) return;
   document.getElementById('special-order-items').innerHTML = specialItems.map(item => {
     const index = items.indexOf(item);
     return menuTile(index, order.quantities[index]);
   }).join('');
+}
+function toggleSpecialOrders() {
+  specialOrdersVisible = !specialOrdersVisible;
+  const button = document.getElementById('special-order-toggle');
+  button.classList.toggle('special-order-active', specialOrdersVisible);
+  renderSpecialOrders();
+  if (specialOrdersVisible) document.getElementById('special-order-name').focus();
 }
 function renderMenu() {
   const order = activeOrder();
@@ -336,6 +344,7 @@ async function initialize() {
     event.preventDefault();
     addSpecialItem(document.getElementById('special-order-name').value, document.getElementById('special-order-price').value);
   });
+  document.getElementById('special-order-toggle').addEventListener('click', toggleSpecialOrders);
   document.getElementById('new-date').addEventListener('click', () => openDatePicker('new'));
   document.getElementById('date-picker').addEventListener('change', event => applyPickedDate(event.target.value));
   document.getElementById('date-list').addEventListener('click', event => {

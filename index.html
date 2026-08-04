@@ -14,7 +14,7 @@
     <header class="date-manager w3-card-2 w3-round-large w3-white" aria-label="Order dates">
       <div class="date-manager-heading w3-bar">
         <div class="w3-bar-item"><p class="eyebrow">Food orders</p><h1>Order dates</h1></div>
-        <button id="new-date" class="w3-button new-button" type="button">+ New date</button>
+        <div class="date-manager-actions"><button id="new-date" class="w3-button new-button" type="button">+ New date</button><button id="special-order-toggle" class="w3-button format-button" type="button">Special Order</button><button id="export-invoice" class="w3-button export-button" type="button">Export invoice</button></div>
       </div>
       <div id="date-list" class="date-list w3-row-padding" aria-label="Current order dates"></div>
       <label class="active-delivery-control" for="active-delivery"><span id="active-delivery-label">Delivery for selected date</span><select id="active-delivery" class="w3-select w3-border"></select></label><label class="active-surcharge-control" for="surcharge-rate"><span>Surcharge</span><select id="surcharge-rate" class="w3-select w3-border"><option value="0">None</option><option value="0.10">10%</option><option value="0.15">15%</option></select></label>
@@ -38,7 +38,7 @@
       </section>
 
       <aside class="totals-panel w3-white w3-card-2" aria-labelledby="totals-heading">
-        <div class="totals-heading"><h1 id="totals-heading">Totals by date</h1><div class="totals-actions"><button id="special-order-toggle" class="w3-button format-button" type="button">Special Order</button><button id="export-invoice" class="w3-button export-button" type="button">Export invoice</button></div></div>
+        <div class="totals-heading"><h1 id="totals-heading">Totals by date</h1></div>
         <div id="totals-content" class="totals-content"><div id="date-totals"></div></div>
         <div class="totals-footer"><div class="all-totals"><div><span>Food subtotal</span><span class="total-caption">No delivery</span></div><strong id="food-subtotal">$0</strong></div><div class="all-totals"><div><span id="surcharge-label">Surcharge</span><span class="total-caption">After delivery</span></div><strong id="surcharge-total">$0</strong></div><div class="grand-total"><span>All dates total</span><span id="grand-total">$0</span></div></div>
       </aside>
