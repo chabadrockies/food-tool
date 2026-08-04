@@ -169,6 +169,31 @@
                     "price": 32
                 }
             ]
+        },
+        {
+            "name": "Shabbat Meals",
+            "items": [
+                {
+                    "name": "Full Shabbat Experience",
+                    "price": 195
+                },
+                {
+                    "name": "Shabbat Package to Go",
+                    "price": 220
+                },
+                {
+                    "name": "Shabbat Package to Go (Discounted)",
+                    "price": 205
+                },
+                {
+                    "name": "Friday Night Dinner",
+                    "price": 125
+                },
+                {
+                    "name": "Shabbat Lunch",
+                    "price": 115
+                }
+            ]
         }
     ],
     "deliveryMethods": [
