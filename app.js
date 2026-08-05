@@ -245,6 +245,9 @@ function invoiceDeliveryText(delivery) { return delivery.fee ? [`Delivery: ${del
 function whatsappDeliveryText(delivery) {
   return delivery.fee ? [`*Delivery:* ${delivery.name} ${money(delivery.fee)}`, '*Delivery Time:*'] : ['*Pickup at:* Chabad 216 Trapper Rise', '*Pickup Time:*'];
 }
+function emailInvoiceMarkup(invoice) {
+  return `<div id="invoice-title" class="invoice-title"><strong>Kosher Food Order Summary</strong></div>${invoice.sections.map(section => `<section><div class="invoice-date"><strong>${invoiceDateLabel(section.date)}</strong></div><div class="delivery-details">${invoiceDeliveryMarkup(section.delivery)}</div><div class="invoice-items">${section.lines.length ? section.lines.map(line => `<div class="invoice-line">${invoiceItemMarkup(line)}</div>`).join('') : '<div class="invoice-line">No food selected.</div>'}</div></section>`).join('')}${invoiceSummaryMarkup(invoice)}`;
+}
 function whatsappItemLine(line) { return line; }
 function whatsappInvoiceText(invoice) {
   const summary = [];
